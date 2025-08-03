@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
 
     const posts: Post[] = response.data.data.children
       .filter((child: { data: { score: number } }) => child.data.score >= 50)
+      .slice(0, 5) // Limit to 5 posts
       .map(
         (child: {
           data: {
