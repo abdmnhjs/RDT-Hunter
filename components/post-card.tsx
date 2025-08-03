@@ -11,7 +11,7 @@ import { ArrowUp } from "lucide-react";
 
 export function PostCard({ title, url, score, author, subreddit }: Post) {
   return (
-    <Link href={url}>
+    <Link href={url} target="_blank">
       <Card>
         <CardHeader>
           <CardTitle>{title}</CardTitle>
