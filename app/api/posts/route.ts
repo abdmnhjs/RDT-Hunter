@@ -33,14 +33,15 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const keyword = searchParams.get("keyword") || "";
 
+    // Transform keyword into a Reddit search query with + operator
+    const searchQuery = keyword.replace(/\s+/g, "+");
+
     // Get access token
     const accessToken = await getRedditAccessToken();
 
     // Search Reddit posts
     const response = await axios.get(
-      `https://oauth.reddit.com/search?q=${encodeURIComponent(
-        keyword
-      )}&type=link&sort=new&t=week`,
+      `https://oauth.reddit.com/search?q=${searchQuery}&type=link&sort=hot&t=week`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -49,25 +50,28 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const posts: Post[] = response.data.data.children.slice(0, 20).map(
-      (child: {
-        data: {
-          title: string;
-          permalink: string;
-          score: number;
-          author: string;
-          created_utc: number;
-          subreddit_name_prefixed: string;
-        };
-      }) => ({
-        title: child.data.title,
-        url: `https://reddit.com${child.data.permalink}`,
-        score: child.data.score,
-        author: child.data.author,
-        created: new Date(child.data.created_utc * 1000).toISOString(),
-        subreddit: child.data.subreddit_name_prefixed,
-      })
-    );
+    const posts: Post[] = response.data.data.children
+      .filter((child: { data: { score: number } }) => child.data.score >= 20)
+      .slice(0, 20)
+      .map(
+        (child: {
+          data: {
+            title: string;
+            permalink: string;
+            score: number;
+            author: string;
+            created_utc: number;
+            subreddit_name_prefixed: string;
+          };
+        }) => ({
+          title: child.data.title,
+          url: `https://reddit.com${child.data.permalink}`,
+          score: child.data.score,
+          author: child.data.author,
+          created: new Date(child.data.created_utc * 1000).toISOString(),
+          subreddit: child.data.subreddit_name_prefixed,
+        })
+      );
 
     return NextResponse.json(posts);
   } catch (error) {

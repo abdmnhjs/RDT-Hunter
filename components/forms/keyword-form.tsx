@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import { Search } from "lucide-react";
+import { QueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({
   keyword: z
@@ -35,7 +37,7 @@ const FormSchema = z.object({
     ),
 });
 
-export function KeywordForm() {
+export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -46,6 +48,8 @@ export function KeywordForm() {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       await axios.post("/api/keyword", { name: data.keyword });
+      queryClient.invalidateQueries({ queryKey: ["keywords"] });
+      form.reset();
     } catch (error) {
       console.error(error);
     }
@@ -53,7 +57,7 @@ export function KeywordForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-2">
         <FormField
           control={form.control}
           name="keyword"
@@ -61,7 +65,14 @@ export function KeywordForm() {
             <FormItem>
               <FormLabel>Keyword</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Input
+                    {...field}
+                    className="pl-9"
+                    placeholder="Enter a keyword"
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -25,3 +25,16 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id } = await request.json();
+    await prisma.keyword.delete({ where: { id } });
+    return NextResponse.json({ message: "Keyword deleted" });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to delete keyword " + error },
+      { status: 500 }
+    );
+  }
+}
