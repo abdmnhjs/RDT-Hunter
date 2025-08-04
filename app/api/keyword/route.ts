@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
+    await prisma.postSaved.deleteMany({
+      where: { keywords: { some: { id } } },
+    });
     await prisma.keyword.delete({ where: { id } });
     return NextResponse.json({ message: "Keyword deleted" });
   } catch (error) {

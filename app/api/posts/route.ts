@@ -1,77 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
+import { prisma } from "@/lib/db/prisma";
 import { Post } from "@/types/posts";
-import { Redis } from "@upstash/redis";
-import { Ratelimit } from "@upstash/ratelimit";
+import axios from "axios";
 
-// Créer une instance Redis
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || "",
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
-});
-
-// Configurer le rate limit: 10 requêtes par minute par IP
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, "1 m"),
-});
-
-// Cache des résultats pendant 5 minutes
-const CACHE_TTL = 300; // 5 minutes en secondes
-
-async function getRedditAccessToken() {
-  const clientId = process.env.REDDIT_CLIENT_ID;
-  const clientSecret = process.env.REDDIT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    throw new Error("Reddit credentials are not configured");
-  }
-
-  const authString = Buffer.from(`${clientId}:${clientSecret}`).toString(
-    "base64"
-  );
-
-  const response = await axios.post(
-    "https://www.reddit.com/api/v1/access_token",
-    "grant_type=client_credentials",
-    {
-      headers: {
-        Authorization: `Basic ${authString}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-
-  return response.data.access_token;
-}
-
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    // Obtenir l'IP du client
-    const ip =
-      request.headers.get("x-forwarded-for") ||
-      request.headers.get("x-real-ip") ||
-      "127.0.0.1";
-
-    // Vérifier le rate limit
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
-
-    if (!success) {
-      return NextResponse.json(
-        { error: "Too many requests" },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": limit.toString(),
-            "X-RateLimit-Remaining": remaining.toString(),
-            "X-RateLimit-Reset": reset.toString(),
-          },
-        }
-      );
-    }
-
-    const searchParams = request.nextUrl.searchParams;
-    const keyword = searchParams.get("keyword") || "";
+    const { keyword } = await request.json();
 
     if (!keyword) {
       return NextResponse.json(
@@ -80,64 +14,140 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Vérifier le cache
-    const cacheKey = `posts:${keyword}`;
-    const cachedData = await redis.get<Post[]>(cacheKey);
+    // Vérifier si le keyword existe déjà, sinon le créer
+    let keywordEntity = await prisma.keyword.findUnique({
+      where: { name: keyword },
+    });
 
-    if (cachedData) {
-      return NextResponse.json(cachedData);
+    if (!keywordEntity) {
+      keywordEntity = await prisma.keyword.create({
+        data: { name: keyword },
+      });
     }
 
-    // Use the keyword directly as the search query, properly encoded for Reddit's API
-    const searchQuery = encodeURIComponent(keyword);
+    // Get Reddit credentials
+    const clientId = process.env.REDDIT_CLIENT_ID;
+    const clientSecret = process.env.REDDIT_SECRET;
 
-    // Get access token
-    const accessToken = await getRedditAccessToken();
+    if (!clientId || !clientSecret) {
+      return NextResponse.json(
+        { error: "Reddit credentials are not configured" },
+        { status: 500 }
+      );
+    }
 
-    // Search Reddit posts with relevant parameters
-    const response = await axios.get(
-      `https://oauth.reddit.com/search?q=title%3A%22${searchQuery}%22&sort=new&limit=100`,
+    // Get Reddit access token
+    const authResponse = await axios.post(
+      "https://www.reddit.com/api/v1/access_token",
+      new URLSearchParams({
+        grant_type: "client_credentials",
+      }).toString(),
       {
+        auth: {
+          username: clientId,
+          password: clientSecret,
+        },
         headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "User-Agent": "RDTHunter/1.0.0",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": "MyApp/1.0.0",
         },
       }
     );
 
-    const posts: Post[] = response.data.data.children
-      .filter((child: { data: { score: number } }) => child.data.score >= 20)
-      .slice(0, 20)
-      .map(
-        (child: {
-          data: {
-            title: string;
-            permalink: string;
-            score: number;
-            author: string;
-            created_utc: number;
-            subreddit_name_prefixed: string;
-          };
-        }) => ({
-          title: child.data.title,
-          url: `https://reddit.com${child.data.permalink}`,
-          score: child.data.score,
-          author: child.data.author,
-          created: new Date(child.data.created_utc * 1000).toISOString(),
-          subreddit: child.data.subreddit_name_prefixed,
-        })
+    const accessToken = authResponse.data.access_token;
+
+    // Make the Reddit API request
+    const response = await axios.get(
+      `https://oauth.reddit.com/search?q=${keyword}&sort=top&limit=100&t=week`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "User-Agent": "MyApp/1.0.0",
+        },
+      }
+    );
+
+    if (response.status !== 200) {
+      throw new Error("Failed to fetch from Reddit API");
+    }
+
+    const data = response.data;
+    const posts = data.data.children;
+
+    // Sauvegarder chaque post
+    const savedPosts = await Promise.all(
+      posts.map(async (post: { data: Post }) => {
+        const postData = post.data;
+
+        try {
+          return await prisma.postSaved.upsert({
+            where: { url: postData.url },
+            update: {
+              keywords: {
+                connect: { id: keywordEntity.id },
+              },
+            },
+            create: {
+              title: postData.title,
+              url: postData.url,
+              score: postData.score,
+              author: postData.author,
+              subreddit: postData.subreddit,
+              keywords: {
+                connect: { id: keywordEntity.id },
+              },
+            },
+          });
+        } catch (error) {
+          console.error("Error saving post:", error);
+          return null;
+        }
+      })
+    );
+
+    // Filtrer les posts qui n'ont pas pu être sauvegardés
+    const successfulPosts = savedPosts.filter((post) => post !== null);
+
+    return NextResponse.json({
+      message: "Posts retrieved and saved successfully",
+      savedCount: successfulPosts.length,
+      keyword: keywordEntity,
+    });
+  } catch (err) {
+    console.error("Error in POST /api/posts:", err);
+
+    // Check for specific error types
+    if (!process.env.REDDIT_CLIENT_ID || !process.env.REDDIT_SECRET) {
+      return NextResponse.json(
+        { error: "Reddit credentials are not configured" },
+        { status: 500 }
       );
+    }
 
-    // Mettre en cache les résultats
-    await redis.set(cacheKey, posts, { ex: CACHE_TTL });
+    const error = err as {
+      response?: { status: number };
+      code?: string;
+      message?: string;
+    };
 
-    return NextResponse.json(posts);
-  } catch (error) {
-    console.error("Error:", error);
+    if (error?.response?.status === 401) {
+      return NextResponse.json(
+        { error: "Invalid or expired Reddit access token" },
+        { status: 500 }
+      );
+    }
+
+    if (error?.code === "P2002") {
+      return NextResponse.json(
+        { error: "Duplicate post URL detected" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       {
-        error: "Internal Server Error",
-        details: error instanceof Error ? error.message : String(error),
+        error:
+          "Failed to process request: " + (error?.message || "Unknown error"),
       },
       { status: 500 }
     );

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { QueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({
@@ -48,6 +48,7 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       await axios.post("/api/keyword", { name: data.keyword });
+      await axios.post("/api/posts", { keyword: data.keyword });
       queryClient.invalidateQueries({ queryKey: ["keywords"] });
       form.reset();
     } catch (error) {
@@ -78,7 +79,13 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        {form.formState.isSubmitting ? (
+          <Button type="submit" disabled>
+            <Loader2 className="animate-spin" />
+          </Button>
+        ) : (
+          <Button type="submit">Submit</Button>
+        )}
       </form>
     </Form>
   );

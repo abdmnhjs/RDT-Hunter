@@ -16,5 +16,16 @@ datasource db {
 
 model Keyword {
   id        String   @id @default(uuid())
-  name      String
+  name      String   @unique
+  posts     PostSaved[]
+}
+
+model PostSaved {
+  id        String   @id @default(uuid())
+  title     String
+  url       String   @unique
+  score     Int
+  author    String
+  subreddit String
+  keywords  Keyword[]
 }

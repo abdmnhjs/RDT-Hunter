@@ -21,17 +21,17 @@ export default function Home() {
 
   const queries = useQueries({
     queries: (keywords || []).map((keyword) => ({
-      queryKey: ["posts", keyword.name],
+      queryKey: ["posts-saved", keyword.name],
       queryFn: async () => {
         const response = await axios.get<Post[]>(
-          `/api/posts?keyword=${encodeURIComponent(keyword.name)}`
+          `/api/posts-saved?keyword=${encodeURIComponent(keyword.name)}`
         );
         return { posts: response.data };
       },
     })),
   });
 
-  queryClient.invalidateQueries({ queryKey: ["posts"] });
+  queryClient.invalidateQueries({ queryKey: ["posts-saved"] });
 
   if (isLoadingKeywords) {
     return (
