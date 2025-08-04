@@ -8,6 +8,7 @@ import { PostCard } from "@/components/post-card";
 import { Toaster } from "sonner";
 import { KeywordForm } from "@/components/forms/keyword-form";
 import { CircleX } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -66,11 +67,11 @@ export default function Home() {
         {keywords.map((keyword) => (
           <div
             key={keyword.id}
-            className="h-9 px-4 py-2 has-[>svg]:px-3 border shadow-xs inline-flex items-center justify-between rounded-md gap-2"
+            className="h-9 px-4 py-2 has-[>svg]:px-3 border-[#290D04] border rounded-md shadow-xs inline-flex items-center justify-between rounded-md gap-2"
           >
             <p className="text-sm font-medium">{keyword.name}</p>
             <CircleX
-              className="w-4 h-4 cursor-pointer"
+              className="w-4 h-4 cursor-pointer text-[#F94500]"
               onClick={() => handleDelete(keyword.id)}
             />
           </div>
@@ -92,11 +93,13 @@ export default function Home() {
               ) : !data?.posts?.length ? (
                 <p className="text-gray-500">No results found</p>
               ) : (
-                <div className="flex flex-col gap-4 max-h-[500px] overflow-y-auto p-2">
-                  {data.posts.map((post: Post) => (
-                    <PostCard key={post.url} {...post} />
-                  ))}
-                </div>
+                <ScrollArea className="flex flex-col p-2 max-h-[500px]">
+                  <div className="flex flex-col gap-4">
+                    {data.posts.map((post: Post) => (
+                      <PostCard key={post.url} {...post} />
+                    ))}
+                  </div>
+                </ScrollArea>
               )}
             </div>
           );

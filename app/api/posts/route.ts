@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Make the Reddit API request
     const response = await axios.get(
-      `https://oauth.reddit.com/search?q=${keyword}&sort=relevance&limit=100&t=week`,
+      `https://oauth.reddit.com/search?q=${keyword}&sort=relevance&limit=100&t=month&selftext=true`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -97,7 +97,6 @@ export async function POST(request: NextRequest) {
             create: {
               title: postData.title,
               url: postData.url,
-              score: postData.score,
               author: postData.author,
               subreddit: postData.subreddit,
               keywords: {

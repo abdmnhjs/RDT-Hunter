@@ -66,11 +66,11 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
             <FormItem>
               <FormLabel>Keyword</FormLabel>
               <FormControl>
-                <div className="relative flex-1">
+                <div className="relative flex-1 ">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                   <Input
                     {...field}
-                    className="pl-9"
+                    className="pl-9 border-[#290D04] border rounded-md"
                     placeholder="Enter a keyword"
                   />
                 </div>
@@ -84,7 +84,9 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
             <Loader2 className="animate-spin" />
           </Button>
         ) : (
-          <Button type="submit">Submit</Button>
+          <Button type="submit" className="bg-[#FF4500] hover:bg-[#FF4500]/50">
+            Submit
+          </Button>
         )}
       </form>
     </Form>
