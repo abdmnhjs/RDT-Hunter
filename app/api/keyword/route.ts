@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
 export async function GET() {
   try {
     const keywords = await prisma.keyword.findMany();
@@ -12,7 +11,6 @@ export async function GET() {
     );
   }
 }
-
 export async function POST(request: NextRequest) {
   try {
     const { name } = await request.json();
@@ -25,15 +23,33 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
 export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
-    await prisma.postSaved.deleteMany({
-      where: { keywords: { some: { id } } },
+    // Trouver les posts qui n'ont que ce keyword
+    const postsToDelete = await prisma.postSaved.findMany({
+      where: {
+        keywords: {
+          some: { id },
+          none: { NOT: { id } },
+        },
+      },
     });
+    // Supprimer ces posts
+    if (postsToDelete.length > 0) {
+      await prisma.postSaved.deleteMany({
+        where: {
+          id: {
+            in: postsToDelete.map((post) => post.id),
+          },
+        },
+      });
+    }
+    // Supprimer le keyword
     await prisma.keyword.delete({ where: { id } });
-    return NextResponse.json({ message: "Keyword deleted" });
+    return NextResponse.json({
+      message: `Keyword deleted with ${postsToDelete.length} associated posts`,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to delete keyword " + error },

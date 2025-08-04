@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Make the Reddit API request
     const response = await axios.get(
-      `https://oauth.reddit.com/search?q=${keyword}&sort=top&limit=100&t=week`,
+      `https://oauth.reddit.com/search?q=${keyword}&sort=relevance&limit=100&t=week`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -74,9 +74,16 @@ export async function POST(request: NextRequest) {
     const data = response.data;
     const posts = data.data.children;
 
+    // Filtrer les posts pour ne garder que ceux dont le titre contient tous les mots du keyword
+    const keywordWords = keyword.toLowerCase().split(" ");
+    const filteredPosts = posts.filter((post: { data: Post }) => {
+      const title = post.data.title.toLowerCase();
+      return keywordWords.every((word: string) => title.includes(word));
+    });
+
     // Sauvegarder chaque post
     const savedPosts = await Promise.all(
-      posts.map(async (post: { data: Post }) => {
+      filteredPosts.map(async (post: { data: Post }) => {
         const postData = post.data;
 
         try {
