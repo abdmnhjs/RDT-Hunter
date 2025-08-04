@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     // Search Reddit posts
     const response = await axios.get(
-      `https://oauth.reddit.com/search?q=${searchQuery}&type=link&sort=hot&t=week`,
+      `https://oauth.reddit.com/search?q=${searchQuery}&type=link&sort=hot`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
