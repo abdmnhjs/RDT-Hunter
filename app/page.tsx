@@ -10,6 +10,9 @@ import { KeywordForm } from "@/components/forms/keyword-form";
 import { CircleX } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Favorites } from "@/components/favorites";
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -63,6 +66,18 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4 space-y-8">
       <Toaster />
+      <div className="fixed top-4 right-4 z-50">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="font-semibold">
+              ⭐ Favorites
+            </Button>
+          </DialogTrigger>
+          <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+            <Favorites />
+          </DialogContent>
+        </Dialog>
+      </div>
       <KeywordForm queryClient={queryClient} />
       <div className="flex flex-wrap gap-2">
         {keywords.map((keyword) => (

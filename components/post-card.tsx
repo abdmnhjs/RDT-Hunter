@@ -1,8 +1,18 @@
 import { Post } from "@/types/posts";
 import Link from "next/link";
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Heart } from "lucide-react";
+import { useFavorites } from "@/hooks/use-favorites";
 
 export function PostCard({ title, url, author, subreddit }: Post) {
+  const { addPost, removePost, posts } = useFavorites();
   return (
     <Link href={url} target="_blank">
       <Card className="border-0 bg-[#290D04] text-white">
@@ -15,6 +25,25 @@ export function PostCard({ title, url, author, subreddit }: Post) {
               {subreddit}
             </span>
           </CardDescription>
+          <CardAction>
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                if (posts.some((post) => post.url === url)) {
+                  removePost({ id: url, title, url, author, subreddit });
+                } else {
+                  addPost({ id: url, title, url, author, subreddit });
+                }
+                e.stopPropagation();
+              }}
+            >
+              <Heart
+                className={`w-4 h-4 ${
+                  posts.some((post) => post.url === url) ? "fill-red-500" : ""
+                }`}
+              />
+            </Button>
+          </CardAction>
         </CardHeader>
       </Card>
     </Link>
