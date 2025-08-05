@@ -13,8 +13,10 @@ export async function GET() {
 }
 export async function POST(request: NextRequest) {
   try {
-    const { name } = await request.json();
-    const keyword = await prisma.keyword.create({ data: { name } });
+    const { name, subreddit } = await request.json();
+    const keyword = await prisma.keyword.create({
+      data: { name, subreddit },
+    });
     return NextResponse.json(keyword);
   } catch (error) {
     return NextResponse.json(

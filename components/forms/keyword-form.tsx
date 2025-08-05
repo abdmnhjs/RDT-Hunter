@@ -49,7 +49,10 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
-      await axios.post("/api/keyword", { name: data.keyword });
+      await axios.post("/api/keyword", {
+        name: data.keyword,
+        subreddit: data.subreddit,
+      });
       await axios.post("/api/posts", {
         keyword: data.keyword,
         subreddit: data.subreddit,
@@ -91,7 +94,7 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
                 <Input
                   {...field}
                   className="border-[#290D04] border rounded-md"
-                  placeholder="r/example"
+                  placeholder="Enter a subreddit name"
                 />
               </FormControl>
             </FormItem>

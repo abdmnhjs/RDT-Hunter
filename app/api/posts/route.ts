@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
 
     // Validate subreddit if provided
     if (subreddit) {
-      // Remove "r/" prefix if present and clean the subreddit name
-      const cleanSubreddit = subreddit.replace(/^r\//, "").trim().toLowerCase();
-
-      if (!/^[a-zA-Z0-9_]{3,21}$/.test(cleanSubreddit)) {
+      if (!/^[a-zA-Z0-9_]{3,21}$/.test(subreddit.trim().toLowerCase())) {
         return NextResponse.json(
           {
             error:
@@ -84,10 +81,12 @@ export async function POST(request: NextRequest) {
     const accessToken = authResponse.data.access_token;
 
     // Make the Reddit API request
+    const searchUrl = subreddit
+      ? `https://oauth.reddit.com/r/${subreddit}/search?q=${keyword}&restrict_sr=1`
+      : `https://oauth.reddit.com/search?q=${keyword}`;
+
     const response = await axios.get(
-      `https://oauth.reddit.com/search?q=${keyword}&sort=relevance&limit=100&t=month&selftext=true${
-        subreddit ? `&sr=${subreddit}` : ""
-      }`,
+      `${searchUrl}&sort=relevance&limit=100&t=month&selftext=true`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,

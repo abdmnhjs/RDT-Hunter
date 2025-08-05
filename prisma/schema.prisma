@@ -17,6 +17,7 @@ datasource db {
 model Keyword {
   id        String   @id @default(uuid())
   name      String   @unique
+  subreddit String?
   posts     PostSaved[]
 }
 
