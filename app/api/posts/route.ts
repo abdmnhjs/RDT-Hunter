@@ -5,7 +5,7 @@ import axios from "axios";
 
 export async function POST(request: NextRequest) {
   try {
-    const { keyword } = await request.json();
+    const { keyword, subreddit, searchOptions } = await request.json();
 
     if (!keyword) {
       return NextResponse.json(
@@ -13,6 +13,33 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Validate subreddit if provided
+    if (subreddit) {
+      // Remove "r/" prefix if present and clean the subreddit name
+      const cleanSubreddit = subreddit.replace(/^r\//, "").trim().toLowerCase();
+
+      if (!/^[a-zA-Z0-9_]{3,21}$/.test(cleanSubreddit)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid subreddit name. Must be 3-21 characters, alphanumeric and underscores only.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Default search options
+    const defaultOptions = {
+      sort: "relevance", // relevance, hot, new, top
+      timeframe: "month", // hour, day, week, month, year, all
+      limit: 100, // 1-100
+      includeNsfw: false,
+      searchType: "all", // all, link, self (text posts only)
+    };
+
+    const options = { ...defaultOptions, ...searchOptions };
 
     // Vérifier si le keyword existe déjà, sinon le créer
     let keywordEntity = await prisma.keyword.findUnique({
@@ -58,7 +85,9 @@ export async function POST(request: NextRequest) {
 
     // Make the Reddit API request
     const response = await axios.get(
-      `https://oauth.reddit.com/search?q=${keyword}&sort=relevance&limit=100&t=month&selftext=true`,
+      `https://oauth.reddit.com/search?q=${keyword}&sort=relevance&limit=100&t=month&selftext=true${
+        subreddit ? `&sr=${subreddit}` : ""
+      }`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,

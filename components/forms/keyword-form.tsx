@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import { Loader2, Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { QueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({
@@ -35,6 +35,7 @@ const FormSchema = z.object({
         message: "Keyword already exists",
       }
     ),
+  subreddit: z.string().optional(),
 });
 
 export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
@@ -42,13 +43,17 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       keyword: "",
+      subreddit: "",
     },
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       await axios.post("/api/keyword", { name: data.keyword });
-      await axios.post("/api/posts", { keyword: data.keyword });
+      await axios.post("/api/posts", {
+        keyword: data.keyword,
+        subreddit: data.subreddit,
+      });
       queryClient.invalidateQueries({ queryKey: ["keywords"] });
       form.reset();
     } catch (error) {
@@ -66,16 +71,29 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
             <FormItem>
               <FormLabel>Keyword</FormLabel>
               <FormControl>
-                <div className="relative flex-1 ">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-                  <Input
-                    {...field}
-                    className="pl-9 border-[#290D04] border rounded-md"
-                    placeholder="Enter a keyword"
-                  />
-                </div>
+                <Input
+                  {...field}
+                  className="border-[#290D04] border rounded-md"
+                  placeholder="Enter a keyword"
+                />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="subreddit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subreddit (optional)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  className="border-[#290D04] border rounded-md"
+                  placeholder="r/example"
+                />
+              </FormControl>
             </FormItem>
           )}
         />
