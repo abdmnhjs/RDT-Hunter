@@ -1,12 +1,25 @@
 import { Favorites } from "../favorites";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 export function FavoritesDialog() {
   return (
     <Dialog>
-      <DialogContent className="max-w-2xl">
+      <DialogTrigger asChild>
+        <Button className="font-semibold">⭐ Favorites</Button>
+      </DialogTrigger>
+      <DialogContent
+        className="!w-[95vw] !max-w-[95vw] !h-[90vh] !max-h-[90vh] md:!w-[80vw] md:!max-w-[80vw] md:!h-[80vh] md:!max-h-[80vh] lg:!max-w-[1000px] lg:!h-[800px] lg:!max-h-[800px] overflow-y-auto text-black"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
-          <DialogTitle>Favorites</DialogTitle>
+          <DialogTitle></DialogTitle>
         </DialogHeader>
         <Favorites />
       </DialogContent>
