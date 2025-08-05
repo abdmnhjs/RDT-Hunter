@@ -26,7 +26,10 @@ export function PostCard({ title, url, author, subreddit }: Post) {
             </span>
           </CardDescription>
           <CardAction>
-            <Button
+            <Heart
+              className={`w-4 h-4 text-[#F94500] ${
+                posts.some((post) => post.url === url) ? "fill-[#F94500]" : ""
+              }`}
               onClick={(e) => {
                 e.preventDefault();
                 if (posts.some((post) => post.url === url)) {
@@ -36,13 +39,7 @@ export function PostCard({ title, url, author, subreddit }: Post) {
                 }
                 e.stopPropagation();
               }}
-            >
-              <Heart
-                className={`w-4 h-4 ${
-                  posts.some((post) => post.url === url) ? "fill-red-500" : ""
-                }`}
-              />
-            </Button>
+            />
           </CardAction>
         </CardHeader>
       </Card>
