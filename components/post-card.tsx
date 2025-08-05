@@ -15,7 +15,7 @@ export function PostCard({ title, url, author, subreddit }: Post) {
   const { addPost, removePost, posts } = useFavorites();
   return (
     <Link href={url} target="_blank">
-      <Card className="border-0 bg-[#290D04] text-white hover:bg-[#3a1105] transition-colors">
+      <Card className="border-0 bg-[#290D04] text-white hover:bg-[#3a1105] transition-colors w-full">
         <CardHeader className="gap-4">
           <CardTitle>{title}</CardTitle>
           <CardDescription>

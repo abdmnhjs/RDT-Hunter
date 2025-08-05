@@ -37,7 +37,7 @@ export function ClientSidebar({
   return (
     <div className="relative">
       <div className="absolute right-[-40px] top-4">
-        <SidebarTrigger />
+        <SidebarTrigger className="hover:bg-[#290D04] hover:text-white border-none" />
       </div>
       <Sidebar>
         <SidebarContent className="bg-[#290D04] text-white border-none">

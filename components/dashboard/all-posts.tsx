@@ -5,7 +5,6 @@ import axios from "axios";
 import { PostCard } from "../post-card";
 import { KeywordForm } from "../forms/keyword-form";
 import { CircleX } from "lucide-react";
-import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 
 export function AllPosts() {
@@ -81,17 +80,12 @@ export function AllPosts() {
           const uniqueKey = `keyword-${index}`;
 
           return (
-            <div key={uniqueKey} className="space-y-2">
+            <div
+              key={uniqueKey}
+              className="space-y-2 border-[#290D04] border p-4 rounded-md"
+            >
               <div className="flex flex-row gap-2">
                 <h3 className="text-4xl font-semibold">{keyword}</h3>
-                {keywords[index]?.subreddit && (
-                  <Badge
-                    variant="outline"
-                    className=" border-[#290D04] border text-white"
-                  >
-                    {`(from r/${keywords[index]?.subreddit})`}
-                  </Badge>
-                )}
               </div>
               {isLoading ? (
                 <p>Loading...</p>
