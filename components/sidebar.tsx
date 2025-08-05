@@ -3,13 +3,12 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { GalleryHorizontalEnd, Star } from "lucide-react";
+import { GalleryHorizontalEnd, Heart } from "lucide-react";
 import { ClientSection } from "@/types/client-section";
 
 interface ClientSidebarProps {
@@ -27,7 +26,7 @@ const items = [
   {
     title: "Favorites posts",
     section: "Favorites" as ClientSection,
-    icon: Star,
+    icon: Heart,
   },
 ];
 
@@ -41,7 +40,7 @@ export function ClientSidebar({
         <SidebarTrigger />
       </div>
       <Sidebar>
-        <SidebarContent>
+        <SidebarContent className="bg-[#290D04] text-white border-none">
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
