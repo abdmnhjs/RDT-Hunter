@@ -51,6 +51,7 @@ export function KeywordForm({ queryClient }: { queryClient: QueryClient }) {
     try {
       await axios.post("/api/keyword", {
         name: data.keyword,
+        subreddit: data.subreddit,
       });
       await axios.post("/api/posts", {
         keyword: data.keyword,

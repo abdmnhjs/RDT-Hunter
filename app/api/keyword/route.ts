@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     const { name, subreddit } = await request.json();
     const keyword = await prisma.keyword.create({
-      data: { name, subreddit },
+      data: { name, subreddit: subreddit || null },
     });
     return NextResponse.json(keyword);
   } catch (error) {

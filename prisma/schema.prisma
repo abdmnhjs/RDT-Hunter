@@ -18,6 +18,7 @@ model Keyword {
   id        String   @id @default(uuid())
   name      String   @unique
   posts     PostSaved[]
+  subreddit String?
 }
 
 model PostSaved {

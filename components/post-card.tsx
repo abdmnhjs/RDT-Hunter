@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Button } from "./ui/button";
 import { Heart } from "lucide-react";
 import { useFavorites } from "@/hooks/use-favorites";
 
