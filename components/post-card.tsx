@@ -3,14 +3,21 @@ import Link from "next/link";
 import {
   Card,
   CardAction,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "./ui/card";
 import { Heart } from "lucide-react";
 import { useFavorites } from "@/hooks/use-favorites";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
-export function PostCard({ title, url, author, subreddit }: Post) {
+export function PostCard({ title, url, author, subreddit, summary }: Post) {
   const { addPost, removePost, posts } = useFavorites();
   return (
     <Link href={url} target="_blank">
@@ -32,15 +39,44 @@ export function PostCard({ title, url, author, subreddit }: Post) {
               onClick={(e) => {
                 e.preventDefault();
                 if (posts.some((post) => post.url === url)) {
-                  removePost({ id: url, title, url, author, subreddit });
+                  removePost({
+                    id: url,
+                    title,
+                    url,
+                    author,
+                    subreddit,
+                    summary,
+                  });
                 } else {
-                  addPost({ id: url, title, url, author, subreddit });
+                  addPost({
+                    id: url,
+                    title,
+                    url,
+                    author,
+                    subreddit,
+                    summary,
+                  });
                 }
                 e.stopPropagation();
               }}
             />
           </CardAction>
         </CardHeader>
+        <CardContent>
+          <Accordion
+            type="single"
+            collapsible
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Summary</AccordionTrigger>
+              <AccordionContent>{summary}</AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </CardContent>
       </Card>
     </Link>
   );

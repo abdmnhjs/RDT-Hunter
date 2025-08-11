@@ -9,6 +9,7 @@ import {
 } from "../ui/table";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { SummaryDialog } from "../dialogs/summary-dialog";
 
 export function Favorites() {
   const { posts, removePost, clearFavorites } = useFavorites();
@@ -44,6 +45,9 @@ export function Favorites() {
                     <TableHead className="text-white min-w-[100px]">
                       Subreddit
                     </TableHead>
+                    <TableHead className="text-white min-w-[100px]">
+                      Summary
+                    </TableHead>
                     <TableHead className="text-white w-[100px] text-right pr-4">
                       Actions
                     </TableHead>
@@ -63,6 +67,9 @@ export function Favorites() {
                       </TableCell>
                       <TableCell className="text-white">
                         r/{post.subreddit}
+                      </TableCell>
+                      <TableCell className="text-white">
+                        <SummaryDialog post={post} />
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

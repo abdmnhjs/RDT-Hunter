@@ -27,5 +27,6 @@ model PostSaved {
   url       String   @unique
   author    String
   subreddit String
+  summary   String
   keywords  Keyword[]
 }

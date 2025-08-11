@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { Post } from "@/types/posts";
 import axios from "axios";
+import { getSummaryByAI } from "@/lib/ai/getSummaryByAI";
+import { decode } from "html-entities";
 
 export async function POST(request: NextRequest) {
   try {
-    const { keyword, subreddit, searchOptions } = await request.json();
+    const { keyword, subreddit } = await request.json();
 
     if (!keyword) {
       return NextResponse.json(
@@ -26,17 +28,6 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-
-    // Default search options
-    const defaultOptions = {
-      sort: "relevance", // relevance, hot, new, top
-      timeframe: "month", // hour, day, week, month, year, all
-      limit: 100, // 1-100
-      includeNsfw: false,
-      searchType: "all", // all, link, self (text posts only)
-    };
-
-    const options = { ...defaultOptions, ...searchOptions };
 
     // Vérifier si le keyword existe déjà, sinon le créer
     let keywordEntity = await prisma.keyword.findUnique({
@@ -114,6 +105,19 @@ export async function POST(request: NextRequest) {
       filteredPosts.map(async (post: { data: Post }) => {
         const postData = post.data;
 
+        // Nettoyer le texte HTML
+        const cleanText = decode(postData.selftext)
+          // Supprimer les balises HTML
+          .replace(/<!-- SC_OFF -->|<!-- SC_ON -->/g, "")
+          .replace(/<[^>]*>/g, "")
+          // Supprimer les sauts de ligne multiples
+          .replace(/\n\s*\n/g, "\n")
+          // Supprimer les espaces en début et fin
+          .trim();
+
+        const summary = await getSummaryByAI(cleanText);
+        console.log("Résumé généré:", summary);
+
         try {
           return await prisma.postSaved.upsert({
             where: { url: postData.url },
@@ -127,6 +131,7 @@ export async function POST(request: NextRequest) {
               url: postData.url,
               author: postData.author,
               subreddit: postData.subreddit,
+              summary: summary,
               keywords: {
                 connect: { id: keywordEntity.id },
               },
