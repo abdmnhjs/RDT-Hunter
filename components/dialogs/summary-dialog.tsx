@@ -17,11 +17,13 @@ export function SummaryDialog({ post }: { post: Post }) {
           View Summary
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-[#290D04] border-0 text-white hover:bg-[#3a1105]">
         <DialogHeader>
-          <DialogTitle className="text-black">Summary</DialogTitle>
+          <DialogTitle>Summary</DialogTitle>
         </DialogHeader>
-        <DialogDescription>{post.summary}</DialogDescription>
+        <DialogDescription className="text-white">
+          {post.summary}
+        </DialogDescription>
       </DialogContent>
     </Dialog>
   );

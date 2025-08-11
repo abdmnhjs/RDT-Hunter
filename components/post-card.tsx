@@ -10,12 +10,6 @@ import {
 } from "./ui/card";
 import { Heart } from "lucide-react";
 import { useFavorites } from "@/hooks/use-favorites";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./ui/accordion";
 
 export function PostCard({ title, url, author, subreddit, summary }: Post) {
   const { addPost, removePost, posts } = useFavorites();
@@ -62,20 +56,9 @@ export function PostCard({ title, url, author, subreddit, summary }: Post) {
             />
           </CardAction>
         </CardHeader>
-        <CardContent>
-          <Accordion
-            type="single"
-            collapsible
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            <AccordionItem value="item-1">
-              <AccordionTrigger>Summary</AccordionTrigger>
-              <AccordionContent>{summary}</AccordionContent>
-            </AccordionItem>
-          </Accordion>
+        <CardContent className="flex flex-col gap-2">
+          <CardTitle>Summary</CardTitle>
+          <p className="text-sm text-white">{summary}</p>
         </CardContent>
       </Card>
     </Link>
