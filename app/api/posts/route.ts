@@ -4,6 +4,7 @@ import { Post } from "@/types/posts";
 import axios from "axios";
 import { getSummaryByAI } from "@/lib/ai/getSummaryByAI";
 import { decode } from "html-entities";
+import { forbiddenWords } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,7 +97,23 @@ export async function POST(request: NextRequest) {
     // Filtrer les posts pour ne garder que ceux dont le titre contient tous les mots du keyword
     const keywordWords = keyword.toLowerCase().split(" ");
     const filteredPosts = posts.filter((post: { data: Post }) => {
-      const title = post.data.title.toLowerCase();
+      const title = decode(post.data.title).toLowerCase();
+      const selftext = post.data.selftext
+        ? decode(post.data.selftext)
+            .replace(/<!-- SC_OFF -->|<!-- SC_ON -->/g, "")
+            .replace(/<[^>]*>/g, "")
+            .toLowerCase()
+        : "";
+
+      // Vérifier si le titre ou le contenu contient des mots interdits
+      const hasForbiddenWords = forbiddenWords.some(
+        (word) => title.includes(word) || selftext.includes(word)
+      );
+      if (hasForbiddenWords) {
+        return false;
+      }
+
+      // Vérifier si le titre contient tous les mots-clés recherchés
       return keywordWords.every((word: string) => title.includes(word));
     });
 

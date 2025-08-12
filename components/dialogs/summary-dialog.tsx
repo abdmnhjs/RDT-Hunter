@@ -13,7 +13,7 @@ export function SummaryDialog({ post }: { post: Post }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-[#FF4500] hover:bg-[#FF4500]/50">
+        <Button className="bg-[#290D04] hover:bg-[#290D04]/50">
           View Summary
         </Button>
       </DialogTrigger>
