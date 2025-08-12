@@ -7,10 +7,7 @@ export const getSummaryByAI = async (text: string): Promise<string> => {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: `Provide a concise summary of the following text, focusing on the main points, if there is no text, return "No text to summarize.":
-
-${text}
-
-Summary:`,
+${text}`,
     });
     return response.text ?? "No summary generated.";
   } catch (error) {
