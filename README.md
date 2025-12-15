@@ -26,3 +26,10 @@ git clone https://github.com/abdmnhjs/RDT-Hunter.git
 ```bash
 cd RDT-Hunter
 ```
+
+3. Create a .env file and add these environment variables :
+```bash
+# Replace [client-id] and [client-secret] with your own values from your reddit api account
+REDDIT_CLIENT_ID=[client-id]
+REDDIT_SECRET=[client-secret]
+```
