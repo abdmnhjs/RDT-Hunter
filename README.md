@@ -21,3 +21,8 @@
 ```bash
 git clone https://github.com/abdmnhjs/RDT-Hunter.git
 ```
+
+2. Move into the project folder
+```bash
+cd RDT-Hunter
+```
