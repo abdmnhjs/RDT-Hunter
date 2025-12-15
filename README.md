@@ -39,3 +39,24 @@ REDDIT_CLIENT_ID=[client-id]
 REDDIT_SECRET=[client-secret]
 GEMINI_API_KEY=[gemini-api-key]
 ```
+
+4. Install the dependencies
+```bash
+npm i
+```
+
+5. Generate the prisma client
+```bash
+npx prisma generate
+```
+
+6. Apply the migrations (this will create the tables in your database according to the Prisma schema)
+```bash
+npx prisma migrate dev
+```
+
+7. Run the web server
+```bash
+npm run dev
+```
+
