@@ -30,6 +30,12 @@ cd RDT-Hunter
 3. Create a .env file and add these environment variables :
 ```bash
 # Replace [client-id] and [client-secret] with your own values from your reddit api account
+# Replace [username] and [password] with your own PostgreSQL credentials
+# Replace [gemini-api-key] by the api key you created in Google AI Studio
+# You define the database name when creating the variable
+# Example: postgresql://postgres:mypassword@localhost:5432/rdt-hunter-db
+DATABASE_URL=postgresql://[username]:[password]@localhost:5432/[database-name]
 REDDIT_CLIENT_ID=[client-id]
 REDDIT_SECRET=[client-secret]
+GEMINI_API_KEY=[gemini-api-key]
 ```
